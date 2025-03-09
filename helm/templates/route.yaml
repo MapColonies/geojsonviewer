@@ -1,0 +1,31 @@
+{{- $releaseName := .Release.Name -}}
+{{- $chartName := include "geojsonio.name" . -}}
+{{- $cloudProviderFlavor := include "geojsonio.cloudProviderFlavor" . -}}
+{{- if and (and (.Values.enabled) (eq $cloudProviderFlavor "openshift")) (.Values.route.enabled) -}}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $releaseName }}-{{ $chartName }}-route
+  annotations:
+    haproxy.router.openshift.io/rewrite-target: /
+    {{- if .Values.route.timeout.enabled }}
+    haproxy.router.openshift.io/timeout: {{ .Values.route.timeout.duration }}
+    {{- end }}
+spec:
+  path:  {{ .Values.route.path | default "/" }}
+  host: {{ .Values.route.host }}
+  to:
+    kind: Service
+    name: {{ $releaseName }}-{{ $chartName }}
+    weight: 100
+  port:
+    targetPort: http
+  {{- if .Values.route.https }}
+  tls:
+    termination: {{ .Values.route.tls.termination }}
+    certificate: {{ .Values.route.tls.certificate }}
+    key: {{ .Values.route.tls.key }}
+    caCertificate: {{ .Values.route.tls.caCertificate }}
+    insecureEdgeTerminationPolicy: {{ .Values.route.tls.insecureEdgeTerminationPolicy }}
+  {{- end -}}
+{{- end -}}

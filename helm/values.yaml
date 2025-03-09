@@ -1,0 +1,58 @@
+global:
+  cloudProvider: {}
+  environment: {}
+enabled: true
+environment: production
+replicaCount: 1
+initialDelaySeconds: 60
+nodePort: 30030
+resetOnConfigChange: true
+cloudProvider:
+  imagePullSecretName: my-registry-secret
+  flavor: openshift
+image:
+  repository: mapcolonies-geojsonio
+  tag: v1.0.0
+  imagePullPolicy: IfNotPresent
+env:
+  port: 8080
+  targetPort: 8080
+  protocol: http
+
+config:
+  token: 'geojson'
+  wmtsLink: 'geojson'
+  layerName: 'geojson'
+resources:
+  enabled: true
+  value:
+    limits:
+      cpu: 250m
+      memory: 64Mi
+    requests:
+      cpu: 250m
+      memory: 64Mi
+route:
+  enabled: false
+  https: true
+  path: /
+  host: some-host
+  wildcardPolicy: None
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    certificate: THE-CONTENT-OF-THE-CERT-FILE
+    key: THE-CONTENT-OF-THE-KEY-FILE
+    caCertificate: THE-CONTENT-OF-THE-ROOT-CA-FILE
+    insecureEdgeTerminationPolicy: Redirect # <- important
+  timeout:
+    enabled: false
+    duration: 60s
+ingress:
+  enabled: true
+  path: /
+  host: localhost
+  cors:
+    enabled: true
+    origin: '*'

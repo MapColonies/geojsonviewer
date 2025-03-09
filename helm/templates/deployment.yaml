@@ -1,0 +1,77 @@
+{{- $releaseName := .Release.Name -}}
+{{- $chartName := include "geojsonio.name" . -}}
+{{- $cloudProviderFlavor := include "geojsonio.cloudProviderFlavor" . -}}
+{{- $cloudProviderDockerRegistryUrl := include "geojsonio.cloudProviderDockerRegistryUrl" . -}}
+{{- $cloudProviderImagePullSecretName := include "geojsonio.cloudProviderImagePullSecretName" . -}}
+{{- $imageTag := include "geojsonio.tag" . -}}
+{{- if .Values.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $releaseName }}-{{ $chartName }}
+  labels:
+    app: {{ $chartName }}
+    component: {{ $chartName }}
+    environment: {{ include "geojsonio.environment" . }}
+    release: {{ $releaseName }}
+    {{- include "geojsonio.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $chartName }}
+      release: {{ $releaseName }}
+      run: {{ $releaseName }}-{{ $chartName }}
+      {{- include "geojsonio.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: {{ $chartName }}
+        release: {{ $releaseName }}
+        run: {{ $releaseName }}-{{ $chartName }}
+        {{- include "geojsonio.selectorLabels" . | nindent 8 }}
+      {{- if .Values.resetOnConfigChange }}
+      annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      {{- end }}
+    spec:
+    {{- if $cloudProviderImagePullSecretName }}
+      imagePullSecrets:
+        - name: {{ $cloudProviderImagePullSecretName | quote }}
+    {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ $releaseName }}-{{ $chartName }}-configmap
+      containers:
+        - name: {{ $releaseName }}-{{ $chartName }}-deployment
+          {{- with .Values.image }}
+          image: {{ .repository }}:{{ $imageTag }}
+          {{- end }}
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /usr/share/nginx/html
+          env:
+            - name: npm_config_cache
+              value: /tmp/
+            - name: SERVER_PORT
+              value: {{ .Values.env.targetPort | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ $releaseName }}-{{ $chartName }}-configmap
+          ports:
+            - name: http
+              containerPort: {{ .Values.env.targetPort }}
+              protocol: {{ .Values.env.protocol }}
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.initialDelaySeconds }}
+            httpGet:
+              path: /
+              port: {{ .Values.env.targetPort }}
+          {{- if .Values.resources.enabled }}
+          resources:
+            {{- toYaml .Values.resources.value | nindent 12 }}
+          {{- end }}
+      
+{{- end -}}
