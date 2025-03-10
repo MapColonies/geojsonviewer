@@ -1,5 +1,5 @@
 apiVersion: v2
-name: MapColonies-GeoJSONIO
+name: geojsonviewer
 description: A Helm chart for MapColonies-GeoJSONIO
 type: application
 version: 1.0.0

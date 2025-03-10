@@ -17,7 +17,7 @@ image:
 env:
   port: 8080
   targetPort: 8080
-  protocol: http
+  protocol: TCP
 
 config:
   token: 'geojson'

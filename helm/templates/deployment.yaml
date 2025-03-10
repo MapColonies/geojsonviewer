@@ -51,7 +51,8 @@ spec:
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           volumeMounts:
             - name: config-volume
-              mountPath: /usr/share/nginx/html
+              mountPath: /usr/share/nginx/html/config.json
+              subPath: config.json
           env:
             - name: npm_config_cache
               value: /tmp/

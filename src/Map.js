@@ -8,6 +8,7 @@ import Draw from 'ol/interaction/Draw';
 import { GeoJSON } from 'ol/format';
 import WMTSCapabilities from 'ol/format/WMTSCapabilities';
 import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS';
+import 'ol/ol.css'
 import './Map.css';
 
 function MapComponent(props) {
