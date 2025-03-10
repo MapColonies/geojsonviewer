@@ -8,6 +8,11 @@ import Draw from 'ol/interaction/Draw';
 import { GeoJSON } from 'ol/format';
 import WMTSCapabilities from 'ol/format/WMTSCapabilities';
 import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS';
+import AceEditor from "react-ace";
+
+import "ace-builds/src-noconflict/mode-json";
+import "ace-builds/src-noconflict/theme-github";
+import "ace-builds/src-noconflict/ext-language_tools";
 import 'ol/ol.css'
 import './Map.css';
 
@@ -128,10 +133,19 @@ function MapComponent(props) {
         </div>
         <div>
           <input type="file" accept=".geojson" onChange={handleFileUpload} />
+          <br/>
           <button onClick={saveGeoJson}>Save GeoJSON</button>
           <button onClick={clearMap}>Clear</button>
         </div>
-        <textarea value={geoJson} readOnly rows={10} cols={40} />
+        <AceEditor
+          mode="json"
+          theme='github'
+          value={geoJson}
+          readOnly={true}
+          name="geojson-editor"
+          height='75%'
+          width='400px'
+        />
       </div>
       <div ref={mapRef} className="map-container" />
     </div>
